@@ -1,1 +1,195 @@
+---
+title: "2° Parcial - Distribuciones de Probabilidad y simulaciones Montecarlo - "
+output: html_notebook
+---
+
+### Eleccion de tabla de datos: Distribución Normal
+
+-   Para la eleccion de la tabla de datos, realizamos un experimento de tiempo de reaccion (reflejos). El procedimiento es el siguiente:
+
+1er paso: se necesitan dos alumnos, uno enfrente del otro. Al alumno “A” le vamos a dar una regla de unos 30 cms.
+
+2do paso: el alumno “A” va a tomar la regla por un extremo, quedando esta última en posición vertical. 
+
+3er paso: el alumno “B” va a posicionar su mano en una determinada posición de la regla, preferentemente en el extremo opuesto de la regla. Su mano tiene que quedar en posición de pinza como para detener la caída. 
+
+4to paso: el alumno “A” va a dejar caer la regla en un momento aleatorio y el “B” va detener la caída de la misma con su mano.
+
+5to paso: anotar cuánto cayó la regla. 
+
+
+
+![](alumnoA.png)
+
+![](alumnoB.png)
+
+Los sujetos de prueba fueron los alumnos y el profesor (NACHO, LAUTA, MARIO, RAFA) con un total de 30 datos cada uno.
+
+Una vez obtenidas las pruebas, con la ayuda de ChatGPT vamos a crear una tabla tidy con el nombre "datos_tidy": 
+
+
+```{r}
+library(tidyr)
+library(ggplot2)
+
+datos <- data.frame(
+  NACHO = c(23, 23.5, 26, 24, 20, 21.5, 22, 19, 20.5, 18.5, 19, 16, 20, 20.5, 29, 24, 24, 21.5, 19, 27, 22, 19, 21.5, 14.5, 17.5, 19, 23, 20.5, 20.5, 16.5),
+  LAUTA = c(30, 19, 17, 15.5, 20, 30, 16.5, 19.5, 16, 15, 15.5, 18, 22, 19, 17, 18.5, 18.5, 17, 18, 17, 18, 18, 17.5, 17, 20, 20, 18, 20.5, 14.5, 20),
+  MARIO = c(15, 5, 5, 8, 3, 11.5, 16, 15, 10, 11, 13, 15, 13, 5, 2, 17, 19, 10, 7, 25, 11, 3, 5, 17, 12, 19, 17, 4, 19, 12),
+  RAFA = c(25.5, 23, 24.5, 21.5, 24.5, 25, 17, 12, 20.5, 20, 24, 17.5, 23.5, 18, 25.5, 25.5, 30, 27.5, 20, 22, 20.5, 24, 23, 24.5, 20.5, 20.5, 23, 20, 18, 24)
+)
+
+datos_tidy <- gather(datos, key = NOMBRE, value = VALOR,)
+# print(datos_tidy)
+```
+### Indicadores matemáticos:
+
+Separamos las informaciones de las tablas por nombres information tener un mejor manejo de la informacion:
+
+```{r}
+tablaNACHO <- subset(datos_tidy, NOMBRE == 'NACHO')
+# tablaNACHO
+tablaLAUTA <- subset(datos_tidy, NOMBRE == 'LAUTA')
+# tablaLAUTA
+tablaMARIO <- subset(datos_tidy, NOMBRE == 'MARIO')
+# tablaMARIO
+tablaRAFA <- subset(datos_tidy, NOMBRE == 'RAFA')
+# tablaRAFA
+```
+
+-   Analisis de valores principales:
+
+```{r}
+summary(datos)
+```
+
+
+
+
+## Graficos
+
+### Histograma
+```{r fig.height=10, fig.width=15}
+library(ggplot2)
+ggplot(datos_tidy, aes(VALOR, color = NOMBRE)) +
+  geom_histogram() +
+  facet_grid(rows =, cols = vars(NOMBRE))
+```
+
+### Grafico de caja y dispersion de puntos.
+
+```{r fig.height=10, fig.width=10}
+library(ggplot2)
+ggplot(datos_tidy, aes(x = "", y = VALOR, color = NOMBRE)) +
+  geom_boxplot(aes(NOMBRE)) +
+  geom_jitter(aes(NOMBRE), alpha = 0.3)
+```
+Analisis de los graficos ggplot:
+
+Nacho:
+Posición de la Mediana: La línea dentro del cuadro representa la mediana, que está cerca de 20.5.
+Cuartiles (Q1 y Q3): Los extremos inferior y superior del cuadro representan el primer cuartil (Q1) y el tercer cuartil (Q3), respectivamente. Q1 es aproximadamente 19 y Q3 es aproximadamente 23.
+Bigotes: No hay puntos fuera de los bigotes, lo que sugiere que no hay valores atípicos en los datos de Nacho.
+
+Lauta:
+Posición de la Mediana: La mediana está cerca de 18.5 y se encuentra dentro del cuadro.
+Cuartiles (Q1 y Q3): Q1 es aproximadamente 17 y Q3 es aproximadamente 20.
+Bigotes: Pueden haber puntos fuera de los bigotes, lo que sugiere que podrían haber valores atípicos en los datos de Lauta.
+
+Mario:
+Posición de la Mediana: La mediana está cerca de 13 y se encuentra dentro del cuadro.
+Cuartiles (Q1 y Q3): Q1 es aproximadamente 7.5 y Q3 es aproximadamente 16.
+Bigotes: Pueden haber puntos fuera de los bigotes, lo que sugiere que podrían haber valores atípicos en los datos de Mario.
+
+Rafa:
+Posición de la Mediana: La mediana está cerca de 23 y se encuentra dentro del cuadro.
+Cuartiles (Q1 y Q3): Q1 es aproximadamente 20 y Q3 es aproximadamente 24.5.
+Bigotes: Pueden haber puntos fuera de los bigotes, lo que sugiere que podrían haber valores atípicos en los datos de Rafa.
+
+### Grafico de densidad.
+
+```{r}
+library(ggplot2)
+datos_densidad <- gather(datos, key = "NOMBRE", value = "VALOR")
+
+
+ggplot(datos_densidad, aes(x = VALOR, fill = NOMBRE)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribución de valores por Individuo",
+       x = "Valor",
+       y = "Densidad") +
+  theme_minimal()
+```
+
+Analisis de los graficos de densidad:
+
+- Lauta:
++ Forma de la Distribución: La densidad podría tener una forma de campana, indicando una distribución aproximadamente normal alrededor de la media de 18.87. Esto sugiere que Lauta tiende a obtener puntajes moderadamente bajos de manera consistente.
++ Áreas de Alta Densidad: Las áreas de mayor densidad en el gráfico estarán cerca de la media, alrededor de 18.87. Esto indica donde se concentran la mayoría de los puntajes.
+
+- Mario:
++ Forma de la Distribución: La densidad podría tener una forma más ancha y baja, indicando una distribución más dispersa alrededor de la media de 11.93. Esto sugiere que Mario tiene una variabilidad alta en sus puntajes.
++ Áreas de Alta Densidad: Aunque es más difícil de precisar sin el gráfico, las áreas de alta densidad estarán alrededor de la media, pero se extenderán hacia valores más bajos y más altos.
+
+- Nacho:
++ Forma de la Distribución: La densidad podría tener una forma de campana, indicando una distribución aproximadamente normal alrededor de la media de 21.23. Esto sugiere que Nacho tiende a obtener puntajes moderadamente altos de manera consistente.
++ Áreas de Alta Densidad: Las áreas de mayor densidad en el gráfico estarán cerca de la media, alrededor de 21.23. Esto indica donde se concentran la mayoría de los puntajes.
+
+- Rafa:
+- Forma de la Distribución: La densidad podría tener una forma de campana, indicando una distribución aproximadamente normal alrededor de la media de 21.40. Esto sugiere que Rafa tiende a obtener puntajes moderadamente altos de manera consistente.
+- Áreas de Alta Densidad: Las áreas de mayor densidad en el gráfico estarán cerca de la media, alrededor de 21.40. Esto indica donde se concentran la mayoría de los puntajes.
+
+### Distribuciones - Verificados solo los valores para NACHO.
+
+Función de Densidad (dnorm)
+```{r}
+
+# Selecciona la columna NACHO de tu dataframe
+nacho_data <- datos$NACHO
+
+# Calcula la media y la desviación estándar de los datos
+mean_nacho <- mean(nacho_data)
+sd_nacho <- sd(nacho_data)
+
+# Crea un rango de valores para x
+x <- seq(min(nacho_data), max(nacho_data), length = 100)
+
+# Calcula la función de densidad para el rango de x
+densidad_nacho <- dnorm(x, mean = mean_nacho, sd = sd_nacho)
+
+# Crea el gráfico
+dnorm_nacho <- plot(x, densidad_nacho, type = "l", col = "blue", lwd = 2, 
+     main = "Función de Densidad - NACHO",
+     xlab = "Valor", ylab = "Densidad de Probabilidad")
+
+
+```
+Probabilidad Acumulada (pnorm)
+
+```{r}
+# Crea un rango de valores para x
+x <- seq(min(nacho_data), max(nacho_data), length = 100)
+
+# Calcula la probabilidad acumulada para el rango de x
+prob_nacho <- pnorm(x, mean = mean_nacho, sd = sd_nacho)
+
+# Crea el gráfico
+pnorm_nacho <- plot(x, prob_nacho, type = "l", col = "red", lwd = 2, 
+     main = "Función de Distribución Acumulada - NACHO",
+     xlab = "Valor", ylab = "Probabilidad Acumulada")
+```
+Cuantil (qnorm)
+
+```{r}
+# Crea un rango de probabilidades para q
+q <- seq(0.01, 0.99, length = 100)
+
+# Calcula los cuantiles para el rango de q
+cuantil_nacho <- qnorm(q, mean = mean_nacho, sd = sd_nacho)
+
+# Crea el gráfico
+qnorm_nacho <- plot(q, cuantil_nacho, type = "l", col = "green", lwd = 2, 
+     main = "Función Cuantil - NACHO",
+     xlab = "Probabilidad", ylab = "Cuantil")
+```
 
